@@ -1,0 +1,20 @@
+{
+  "name": "ai-radar-extension",
+  "version": "2.0.0",
+  "description": "AI Radar — Real-time AI news from 16 sources, powered by GitHub Pages backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev":   "vite build --watch",
+    "build": "vite build",
+    "zip":   "node scripts/zip.mjs"
+  },
+  "dependencies": {
+    "react":     "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.1"
+  }
+}

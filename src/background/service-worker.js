@@ -4,7 +4,7 @@
 
 const ALARM_NAME   = "ai-radar-refresh";
 const INTERVAL     = 5; // minutes — how often to check for new breaking news
-const BACKEND_BASE = "https://veitrix-projects.github.io/ai-radar-backend";
+const BACKEND_BASE = "https://veltrix-projects.github.io/ai-radar-backend";
 
 // ── Lifecycle ────────────────────────────────────────────────────────────────
 

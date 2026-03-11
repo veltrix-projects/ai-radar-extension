@@ -1,9 +1,27 @@
 // AI Radar Extension — API Client (src/lib/api.js)
 // Reads all data from GitHub Pages backend
-// Replace BACKEND_URL with your actual GitHub Pages URL
 
-const BACKEND_URL = "https://veltrix-projects.github.io/ai-radar-backend";
-const CACHE_TTL   = 5 * 60 * 1000; // 5 minutes client-side cache
+const DEFAULT_BACKEND = "https://veltrix-projects.github.io/ai-radar-backend";
+const CACHE_TTL       = 5 * 60 * 1000; // 5 minutes client-side cache
+
+// ── Runtime backend URL (can be overridden via settings) ──────────────────────
+
+let _backendUrl = DEFAULT_BACKEND;
+
+export function getBackendUrl() {
+  return _backendUrl;
+}
+
+export function setBackendUrl(url) {
+  _backendUrl = url.replace(/\/$/, "");
+}
+
+// Load saved backend URL from chrome storage on startup
+if (typeof chrome !== "undefined" && chrome.storage) {
+  chrome.storage.local.get("backendUrl", ({ backendUrl }) => {
+    if (backendUrl) _backendUrl = backendUrl.replace(/\/$/, "");
+  });
+}
 
 // ── Cache ─────────────────────────────────────────────────────────────────────
 
@@ -23,8 +41,8 @@ function setCache(key, data) {
 // ── Core fetch ────────────────────────────────────────────────────────────────
 
 async function apiFetch(path) {
-  const url      = `${BACKEND_URL}/${path}`;
-  const cached   = getCached(url);
+  const url    = `${_backendUrl}/${path}`;
+  const cached = getCached(url);
   if (cached) return cached;
 
   const res = await fetch(url, { cache: "no-store" });
@@ -72,16 +90,11 @@ export async function getNewsByDate(dateKey) {
   return data.items || [];
 }
 
-export function getBackendUrl() {
-  return BACKEND_URL;
-}
-
-export function setBackendUrl(url) {
-  // Allow user to override backend URL in settings
-  const clean = url.replace(/\/$/, "");
-  Object.defineProperty(
-    { BACKEND_URL: clean },
-    "BACKEND_URL",
-    { value: clean, writable: true }
-  );
+export async function testConnection() {
+  try {
+    const meta = await apiFetch("metadata.json");
+    return { ok: true, lastUpdated: meta.lastUpdated, count: meta.todayCount };
+  } catch (err) {
+    return { ok: false, error: err.message };
+  }
 }

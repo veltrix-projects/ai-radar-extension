@@ -1,0 +1,57 @@
+{
+  "manifest_version": 3,
+  "name": "AI Radar",
+  "short_name": "AI Radar",
+  "description": "Real-time AI news — models, research, tools and breakthroughs from 16 sources, powered by Gemini.",
+  "version": "2.0.0",
+
+  "icons": {
+    "16":  "icons/icon16.png",
+    "32":  "icons/icon32.png",
+    "48":  "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16":  "icons/icon16.png",
+      "32":  "icons/icon32.png",
+      "48":  "icons/icon48.png",
+      "128": "icons/icon128.png"
+    },
+    "default_title": "AI Radar"
+  },
+
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+
+  "permissions": [
+    "alarms",
+    "notifications",
+    "storage",
+    "tabs"
+  ],
+
+  "host_permissions": [
+    "https://*.github.io/*"
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*", "assets/*", "archive.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}

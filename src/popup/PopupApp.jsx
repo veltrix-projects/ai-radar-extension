@@ -69,7 +69,7 @@ export default function PopupApp() {
               <div style={{ borderLeft:"1px solid #1a1a1f", paddingLeft:"16px", display:"flex", flexDirection:"column", gap:"5px" }}>
                 <Stat label="TODAY"    value={meta.todayCount   ?? "–"} color="#E8E8E8" />
                 <Stat label="BREAKING" value={meta.highCount    ?? "–"} color="#FF2D55" />
-                <Stat label="SOURCES"  value={16}                       color="#00FF88" />
+                <Stat label="SOURCES"  value={meta.sourceCount ?? 26}                       color="#00FF88" />
               </div>
             )}
           </>

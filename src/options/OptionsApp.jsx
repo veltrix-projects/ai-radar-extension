@@ -1,67 +1,74 @@
 // AI Radar v2 — Options (src/options/OptionsApp.jsx)
 import { useState, useEffect } from "react";
 
-const DEFAULT_BACKEND = "https://YOUR_USERNAME.github.io/ai-radar-backend";
+const HARDCODED_BACKEND = "https://veltrix-projects.github.io/ai-radar-backend";
 
 const SOURCES = [
-  { name:"Hacker News",             active:true  },
-  { name:"HuggingFace Papers",      active:true  },
-  { name:"HuggingFace Models",      active:true  },
-  { name:"ArXiv AI/ML/NLP",         active:true  },
-  { name:"GitHub Trending AI",      active:true  },
-  { name:"Reddit r/LocalLLaMA",     active:true  },
-  { name:"Reddit r/MachineLearning",active:true  },
-  { name:"Papers With Code",        active:true  },
-  { name:"OpenAI Blog",             active:true  },
-  { name:"Anthropic Blog",          active:true  },
-  { name:"Google DeepMind",         active:true  },
-  { name:"Meta AI Blog",            active:true  },
-  { name:"NVIDIA Blog",             active:true  },
-  { name:"VentureBeat AI",          active:true  },
-  { name:"TechCrunch AI",           active:true  },
-  { name:"Product Hunt AI",         active:false, note:"Optional API key in backend secrets" },
+  { name:"Hacker News",              active:true  },
+  { name:"HuggingFace Papers",       active:true  },
+  { name:"HuggingFace Models",       active:true  },
+  { name:"ArXiv AI/ML/NLP",          active:true  },
+  { name:"GitHub Trending AI",       active:true  },
+  { name:"Reddit r/LocalLLaMA",      active:true  },
+  { name:"Reddit r/MachineLearning", active:true  },
+  { name:"Papers With Code",         active:true  },
+  { name:"OpenAI Blog",              active:true  },
+  { name:"MIT AI News",              active:true  },
+  { name:"Google DeepMind",          active:true  },
+  { name:"Meta AI Blog",             active:true  },
+  { name:"NVIDIA Blog",              active:true  },
+  { name:"VentureBeat AI",           active:true  },
+  { name:"TechCrunch AI",            active:true  },
+  { name:"The Verge AI",             active:true  },
+  { name:"Ars Technica",             active:true  },
+  { name:"Wired AI",                 active:true  },
+  { name:"MIT Technology Review",    active:true  },
+  { name:"404 Media",                active:true  },
+  { name:"AI News",                  active:true  },
+  { name:"MarkTechPost",             active:true  },
+  { name:"SiliconANGLE AI",          active:true  },
+  { name:"AWS ML Blog",              active:true  },
+  { name:"Google Research",          active:true  },
+  { name:"Product Hunt AI",          active:false, note:"Optional API key in backend secrets" },
 ];
 
 export default function OptionsApp() {
-  const [backendUrl,    setBackendUrl]    = useState(DEFAULT_BACKEND);
   const [notifications, setNotifications] = useState(true);
   const [newTab,        setNewTab]        = useState(false);
   const [toast,         setToast]         = useState({ msg:"", show:false });
-  const [testing,       setTesting]       = useState(false);
-  const [testResult,    setTestResult]    = useState(null);
+  const [status,        setStatus]        = useState(null);
   const [clearConfirm,  setClearConfirm]  = useState(false);
 
   useEffect(() => {
-    chrome.storage.local.get(["backendUrl","notificationsEnabled","newTabOverride"], r => {
-      if (r.backendUrl)              setBackendUrl(r.backendUrl);
+    // Always set the hardcoded backend URL on load
+    chrome.storage.local.set({ backendUrl: HARDCODED_BACKEND });
+    chrome.storage.local.get(["notificationsEnabled","newTabOverride"], r => {
       if (r.notificationsEnabled != null) setNotifications(r.notificationsEnabled);
-      if (r.newTabOverride != null)  setNewTab(r.newTabOverride);
+      if (r.newTabOverride != null)       setNewTab(r.newTabOverride);
     });
+    // Auto-check status on load
+    checkStatus();
   }, []);
 
-  function showToast(msg, ok = true) {
-    setToast({ msg, show:true, ok });
+  function showToast(msg) {
+    setToast({ msg, show:true });
     setTimeout(() => setToast(t => ({...t,show:false})), 3000);
   }
 
-  async function testBackend() {
-    setTesting(true);
-    setTestResult(null);
+  async function checkStatus() {
     try {
-      const url = backendUrl.replace(/\/$/, "");
-      const res = await fetch(`${url}/metadata.json`, { cache:"no-store" });
+      const res  = await fetch(`${HARDCODED_BACKEND}/metadata.json`, { cache:"no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const meta = await res.json();
-      setTestResult({ ok:true, msg:`✓ Connected · ${meta.todayCount || "?"} items today · Last updated ${meta.lastUpdated ? new Date(meta.lastUpdated).toLocaleTimeString() : "unknown"}` });
+      setStatus({ ok:true, msg:`✓ Connected · ${meta.todayCount || "?"} items today · Last updated ${meta.lastUpdated ? new Date(meta.lastUpdated).toLocaleTimeString() : "unknown"}` });
     } catch (err) {
-      setTestResult({ ok:false, msg:`✗ Failed: ${err.message}` });
+      setStatus({ ok:false, msg:`✗ Connection failed: ${err.message}` });
     }
-    setTesting(false);
   }
 
   function save() {
     chrome.storage.local.set({
-      backendUrl:           backendUrl.trim().replace(/\/$/, ""),
+      backendUrl:           HARDCODED_BACKEND,
       notificationsEnabled: notifications,
       newTabOverride:       newTab,
     }, () => showToast("✓ Settings saved"));
@@ -92,26 +99,13 @@ export default function OptionsApp() {
 
       <div style={{ maxWidth:"600px", margin:"0 auto", padding:"40px 24px" }}>
 
-        {/* Backend URL */}
-        <Section label="BACKEND CONFIGURATION">
-          <Field label="GITHUB PAGES URL" desc={<>Your backend repo URL. Format: <code style={{color:"#00F5FF",fontSize:"9px"}}>https://USERNAME.github.io/ai-radar-backend</code></>}>
-            <input
-              type="text" value={backendUrl}
-              onChange={e => setBackendUrl(e.target.value)}
-              placeholder="https://username.github.io/ai-radar-backend"
-              style={inputStyle}
-              spellCheck={false}
-            />
-          </Field>
-          <div style={{ display:"flex", alignItems:"center", gap:"10px", marginTop:"8px" }}>
-            <Btn onClick={testBackend} disabled={testing} accent>
-              {testing ? "TESTING…" : "TEST CONNECTION"}
-            </Btn>
-            {testResult && (
-              <span style={{ fontSize:"10px", color:testResult.ok?"#00FF88":"#FF2D55", fontFamily:"monospace" }}>
-                {testResult.msg}
-              </span>
-            )}
+        {/* Status */}
+        <Section label="CONNECTION STATUS">
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+            <span style={{ fontSize:"10px", color: status?.ok ? "#00FF88" : status ? "#FF2D55" : "#555" }}>
+              {status ? status.msg : "Checking…"}
+            </span>
+            <Btn onClick={checkStatus} accent>REFRESH</Btn>
           </div>
         </Section>
 
@@ -129,7 +123,7 @@ export default function OptionsApp() {
           />
         </Section>
 
-        {/* Data */}
+        {/* Cache */}
         <Section label="CACHE">
           <Field label="CLEAR VISIT HISTORY" desc="Resets unread badge count and notification history.">
             <Btn onClick={clearData} danger>
@@ -163,7 +157,7 @@ export default function OptionsApp() {
         </div>
 
         <div style={{ marginTop:"32px", color:"#1a1a1f", fontSize:"9px", letterSpacing:"1px", textAlign:"center" }}>
-          AI RADAR v2.0.0 · MANIFEST V3 · GITHUB PAGES BACKEND
+          AI RADAR v2.0.0 · MANIFEST V3 · 26 SOURCES
         </div>
       </div>
 
@@ -174,8 +168,6 @@ export default function OptionsApp() {
     </div>
   );
 }
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function Section({ label, children }) {
   return (
@@ -226,9 +218,3 @@ function Btn({ onClick, disabled, accent, danger, children }) {
     </button>
   );
 }
-
-const inputStyle = {
-  background:"#0f0f12", border:"1px solid #1a1a1f", borderRadius:"2px",
-  color:"#E8E8E8", padding:"8px 12px", fontSize:"10px",
-  fontFamily:"monospace", width:"100%", outline:"none", letterSpacing:"0.5px",
-};

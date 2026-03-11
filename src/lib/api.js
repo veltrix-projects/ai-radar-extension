@@ -2,7 +2,7 @@
 // Reads all data from GitHub Pages backend
 // Replace BACKEND_URL with your actual GitHub Pages URL
 
-const BACKEND_URL = "https://YOUR_USERNAME.github.io/ai-radar-backend";
+const BACKEND_URL = "https://veitrix-projects.github.io/ai-radar-backend";
 const CACHE_TTL   = 5 * 60 * 1000; // 5 minutes client-side cache
 
 // ── Cache ─────────────────────────────────────────────────────────────────────

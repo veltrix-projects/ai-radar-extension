@@ -226,13 +226,14 @@ function HeaderBtn({ onClick, disabled, accent, children }) {
 // ── Stats bar ─────────────────────────────────────────────────────────────────
 
 function StatsBar({ counts, metadata }) {
+  // Use metadata for TOTAL+BREAKING so numbers match popup exactly
   const stats = [
-    { label:"TOTAL",    value:counts.total,    color:"#E8E8E8" },
-    { label:"MODELS",   value:counts.model,    color:"#00F5FF" },
-    { label:"RESEARCH", value:counts.research, color:"#FFD600" },
-    { label:"TOOLS",    value:counts.tool,     color:"#00FF88" },
-    { label:"BREAKING", value:counts.high,     color:"#FF2D55" },
-    { label:"SOURCES",  value:16,              color:"#888" },
+    { label:"TOTAL",    value:metadata?.todayCount ?? counts.total,    color:"#E8E8E8" },
+    { label:"MODELS",   value:counts.model,                            color:"#00F5FF" },
+    { label:"RESEARCH", value:counts.research,                         color:"#FFD600" },
+    { label:"TOOLS",    value:counts.tool,                             color:"#00FF88" },
+    { label:"BREAKING", value:metadata?.highCount  ?? counts.high,     color:"#FF2D55" },
+    { label:"SOURCES",  value:metadata?.sourceCount ?? 26,             color:"#888" },
   ];
 
   return (
@@ -306,7 +307,7 @@ function SummaryPanel({ metadata }) {
       <div style={{ fontSize:"10px", color:"#555", lineHeight:"1.8" }}>
         <div>Last updated: <span style={{ color:"#888" }}>{timeAgo(new Date(metadata.lastUpdated).getTime())}</span></div>
         <div>Today: <span style={{ color:"#00F5FF" }}>{metadata.todayCount}</span> items</div>
-        <div>Breaking: <span style={{ color:"#FF2D55" }}>{metadata.highCount}</span> items</div>
+        <div>Sources: <span style={{ color:"#00FF88" }}>{metadata.sourceCount ?? 26}</span> active</div>
       </div>
     </div>
   );
